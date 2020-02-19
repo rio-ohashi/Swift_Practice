@@ -1,6 +1,8 @@
 import Foundation
 
-func passingtoarray(path:String, depth: Int){
+func passingtoarray(path:String, depth: Int=0) -> (Int,Int){
+    var numFile = 0
+    var numDir = 0
     let sourcePath = URL(fileURLWithPath: path, isDirectory: true)
     let fileManager = FileManager.default
     var depthStr:String = ""
@@ -18,15 +20,23 @@ func passingtoarray(path:String, depth: Int){
             } else {
                 print(depthStr + "└─"+file)
             }
-            do {
-                let childPath = path + "/" + file
-                let sourcePath = URL(fileURLWithPath: childPath, isDirectory: true)
-                let _ = try fileManager.contentsOfDirectory(atPath: sourcePath.path)
-                passingtoarray(path:childPath, depth: depth + 1)
-            } catch {
+            
+            var isDir = ObjCBool(false)
+            let child = "\(path)/\(file)"
+            if fileManager.fileExists(atPath: child, isDirectory: &isDir) {
+                if isDir.boolValue {
+                    let (f,d) = passingtoarray(path:child, depth: depth + 1)
+                    numFile += f
+                    numDir += d
+                    numDir += 1
+                }
+                else {
+                    numFile += 1
+                }
             }
         }
     } catch {
         print("Enter valid path!!")
     }
+    return (numFile, numDir)
 }
